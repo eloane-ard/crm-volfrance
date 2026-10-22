@@ -602,7 +602,7 @@ function sheet_(name) {
     'COMMERCIAUX': ['CODE', 'NOM', 'EMAIL', 'ROLE', 'ACTIF']
   }[name];
   if (!headers) throw err_('MISSING_SHEET', 'Onglet introuvable : ' + name);
-  sh = ss.insertSheet(name);
+  sh = ss.insertSheet(name, ss.getNumSheets());
   sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
   sh.setFrozenRows(1);
   if (name.charAt(0) === '_') sh.hideSheet();

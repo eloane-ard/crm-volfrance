@@ -88,6 +88,7 @@ class FakeSheet {
 class FakeSpreadsheet {
   constructor() { this.sheets = {}; this.named = {}; }
   getSheetByName(n) { return this.sheets[n] || null; }
+  getNumSheets() { return Object.keys(this.sheets).length; }
   insertSheet(n) { this.sheets[n] = new FakeSheet(n); return this.sheets[n]; }
   getRangeByName(n) { return this.named[n] || null; }
 }
