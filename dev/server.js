@@ -41,7 +41,7 @@ http.createServer((req, res) => {
   if (!file.startsWith(ROOT)) { res.writeHead(403); res.end(); return; }
   if (url.pathname === '/js/config.js') {
     res.writeHead(200, { 'Content-Type': 'text/javascript' });
-    res.end(fs.readFileSync(file, 'utf8').replace("API_URL: ''", "API_URL: '/api'"));
+    res.end(fs.readFileSync(file, 'utf8').replace(/API_URL: '[^']*'/, "API_URL: '/api'"));
     return;
   }
   fs.readFile(file, (err, data) => {
