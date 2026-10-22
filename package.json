@@ -1,0 +1,10 @@
+{
+  "name": "crm-volaille",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Application commerciale hors connexion connectée à Google Sheets",
+  "scripts": {
+    "dev": "node dev/server.js",
+    "test": "node --test test/server.test.js && node test/e2e.js"
+  }
+}
