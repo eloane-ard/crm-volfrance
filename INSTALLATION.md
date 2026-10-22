@@ -29,7 +29,7 @@ Pour une mise à jour future du code : **Déployer → Gérer les déploiements 
 ## Étape 3 : publier l'application (GitHub Pages, gratuit)
 
 1. Dans le dépôt GitHub : **Settings → Pages → Source : GitHub Actions**.
-2. Chaque modification du dossier `web/` publie automatiquement l'application. L'adresse s'affiche dans **Settings → Pages** (forme `https://VOTRE-IDENTIFIANT.github.io/crm-volaille/`).
+2. Chaque modification du dossier `web/` publie automatiquement l'application. L'adresse s'affiche dans **Settings → Pages** : `https://eloane-ard.github.io/crm-volfrance/`.
 3. Facultatif : collez l'URL `/exec` de l'étape 2 dans `web/js/config.js` (`API_URL`). Sinon, l'application la demande à la première connexion.
 
 Le dépôt ne contient que le code de l'application, jamais de données clients. Les données restent dans votre classeur et sur votre téléphone.
