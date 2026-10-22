@@ -50,7 +50,7 @@ function buildShell() {
   shell.top = h('header', { class: 'topbar' }, shell.back, shell.title, shell.pill, h('a', { class: 'icon-btn top-dash', href: '#/dashboard', 'aria-label': 'Tableau de bord' }, icon('chart')), shell.menu);
   shell.main = h('main', { id: 'main', tabindex: '-1' });
   shell.side = h('nav', { class: 'sidebar', 'aria-label': 'Navigation' },
-    h('div', { class: 'side-brand' }, h('img', { src: 'icons/icon-192.png', alt: '', width: 32, height: 32 }), 'CRM Volaille'),
+    h('div', { class: 'side-brand' }, h('img', { src: 'icons/icon-192.png', alt: '', width: 32, height: 32 }), 'CRM Volfrance'),
     h('a', { class: 'btn primary block side-note', href: '#/note' }, icon('plus'), 'Nouvelle note'),
     NAV.filter(n => n[0] !== '#/note').map(([href, ic, label]) => h('a', { class: 'side-link', href }, icon(ic), label)));
   shell.tabs = h('nav', { class: 'tabbar', 'aria-label': 'Navigation' }, NAV.filter(n => n[3]).map(([href, ic, label]) =>

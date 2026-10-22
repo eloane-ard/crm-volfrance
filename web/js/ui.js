@@ -18,6 +18,9 @@ export function h(tag, attrs, ...children) {
   return el;
 }
 
+/** Ajoute des enfants (tableaux aplatis, null ignorés) à un élément existant. */
+export function fill(el, ...children) { append(el, children); return el; }
+
 function append(el, children) {
   children.forEach(c => {
     if (c === null || c === undefined || c === false) return;

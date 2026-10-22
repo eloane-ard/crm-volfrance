@@ -1,5 +1,5 @@
 // Carnet commercial : saisie rapide d'une note / compte rendu, et historique.
-import { h, icon, toast, field, select, fmtDate, fmtDateLong, norm, badge } from '../ui.js';
+import { h, icon, toast, field, select, fmtDate, fmtDateLong, norm, badge, fill } from '../ui.js';
 import { state, mutate, genId, todayStr, addDays } from '../store.js';
 import { clientPicker, section, emptyState, pendingDot } from '../components.js';
 import * as db from '../db.js';
@@ -148,7 +148,7 @@ export function carnetView(params, query) {
     groups.get(v.date).push(v);
   });
 
-  el.append(
+  fill(el,
     h('div', { class: 'toolbar' }, search, typeSel, h('a', { class: 'btn primary', href: '#/note' }, icon('plus'), 'Note')),
     list.length ? null : emptyState('Aucun compte rendu.'),
     [...groups.entries()].map(([d, vs]) => h('section', { class: 'card' },

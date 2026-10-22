@@ -133,7 +133,7 @@ export function loginView() {
   });
 
   el.append(h('div', { class: 'login-card card' },
-    h('div', { class: 'brand' }, h('img', { src: 'icons/icon-192.png', alt: '', width: 56, height: 56 }), h('h1', null, 'CRM Volaille')),
+    h('div', { class: 'brand' }, h('img', { src: 'icons/icon-192.png', alt: '', width: 56, height: 56 }), h('h1', null, 'CRM Volfrance')),
     h('p', { class: 'muted' }, 'Connexion sécurisée par code envoyé sur votre e-mail. Aucun mot de passe à retenir.'),
     step1, step2, status));
   return { title: 'Connexion', el, bare: true };

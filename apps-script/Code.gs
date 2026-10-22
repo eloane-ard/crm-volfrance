@@ -1,5 +1,5 @@
 /**
- * CRM Volaille - API de synchronisation (Google Apps Script lié au classeur).
+ * CRM Volfrance - API de synchronisation (Google Apps Script lié au classeur).
  *
  * Le classeur reste la base principale. L'application (PWA) appelle ce script en POST :
  *   requestCode  -> envoie un code de connexion à 6 chiffres par e-mail

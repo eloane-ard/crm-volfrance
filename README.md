@@ -1,4 +1,4 @@
-# CRM Volaille
+# CRM Volfrance
 
 Application commerciale hors connexion (PWA) dont la base de données reste le classeur Google Sheets.
 

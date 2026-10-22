@@ -1,6 +1,6 @@
 // Service worker : garde l'application disponible hors connexion.
 // Les données ne passent jamais par ce cache : elles sont dans IndexedDB.
-const VERSION = 'crm-v1.0.1';
+const VERSION = 'crm-v1.0.2';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/api.js', 'js/components.js', 'js/config.js', 'js/db.js', 'js/store.js', 'js/ui.js',

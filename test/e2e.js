@@ -114,7 +114,16 @@ async function main() {
     await page.waitForSelector('text=établissements vus');
     await page.screenshot({ path: path.join(SHOTS, '08-journee.png'), fullPage: true });
 
-    // 8. Tableau de bord et tâches
+    // 8. Carnet : liste affichée correctement (pas de texte brut)
+    await page.goto(BASE + '/#/carnet');
+    await page.waitForSelector('.visit');
+    const carnetText = await page.textContent('main');
+    assert.ok(!carnetText.includes('[object') && !carnetText.startsWith('null'), 'carnet affiché correctement');
+    await page.selectOption('main select', 'VISITE');
+    await page.waitForSelector('.visit');
+    assert.ok(!(await page.textContent('main')).includes('[object'), 'carnet filtré affiché correctement');
+
+    // 9. Tableau de bord et tâches
     await page.goto(BASE + '/#/dashboard');
     await page.waitForSelector('text=Comptes rendus de la semaine');
     await page.screenshot({ path: path.join(SHOTS, '09-tableau-de-bord.png'), fullPage: true });
