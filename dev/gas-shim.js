@@ -38,6 +38,9 @@ class FakeRange {
       for (let c = 0; c < this.nc; c++) {
         const rr = this.row - 1 + r, cc = this.col - 1 + c;
         if (this.sheet.formulas[(rr + 1) + ',' + (cc + 1)]) throw new Error('Écriture sur une formule en ' + (rr + 1) + ',' + (cc + 1));
+        if (this.sheet.reject && this.sheet.reject(rr, cc, vals[r][c])) {
+          throw new Error('Les données que vous avez saisies dans la cellule ' + String.fromCharCode(65 + cc) + (rr + 1) + ' ne respectent pas les règles de validation des données définies pour cette cellule.');
+        }
         while (this.sheet.data.length <= rr) this.sheet.data.push([]);
         let v = vals[r][c];
         if (typeof v === 'string' && v.startsWith("'")) v = v.slice(1);

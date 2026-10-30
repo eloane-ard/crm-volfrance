@@ -359,7 +359,8 @@ function push_(user, mutations) {
           res = { status: 'error', error: e.code || 'SERVER_ERROR', message: String(e.message || e) };
         }
         res.mid = m.mid;
-        if (res.status !== 'error' || res.error !== 'SERVER_ERROR') {
+        // Les erreurs ne sont pas journalisées : la modification pourra être renvoyée telle quelle.
+        if (res.status !== 'error') {
           var summary = { status: res.status, error: res.error, duplicate: res.duplicate };
           journalRows.push([m.mid, ctx.now, user.email, m.entity, m.id, m.op, res.status, JSON.stringify(summary)]);
           done[m.mid] = summary;
@@ -367,7 +368,6 @@ function push_(user, mutations) {
       }
       results.push(res);
     });
-    flushCache_(ctx);
     if (journalRows.length) {
       journal.getRange(journal.getLastRow() + 1, 1, journalRows.length, journalRows[0].length).setValues(journalRows);
     }
@@ -409,7 +409,8 @@ function table_(ctx, name) {
   values.forEach(function (r, i) {
     if (r[idCol]) rowById[r[idCol]] = i;
     for (var c = 0; c < r.length; c++) {
-      if (r[c] !== '' && r[c] !== null && !(formulas[c] && /^=\s*(MAP|ARRAYFORMULA|BYROW)/i.test(formulas[c]))) {
+      // Une case à cocher décochée (false) ne compte pas comme une ligne remplie.
+      if (r[c] !== '' && r[c] !== null && r[c] !== false && !(formulas[c] && /^=\s*(MAP|ARRAYFORMULA|BYROW)/i.test(formulas[c]))) {
         dataEnd = i + 1;
         break;
       }
@@ -418,19 +419,22 @@ function table_(ctx, name) {
   ctx.cache[name] = {
     def: def, sheet: sh, header: header, idx: idx, values: values, rowById: rowById,
     skipCols: formulas.map(function (f) { return /^=\s*(MAP|ARRAYFORMULA|BYROW)/i.test(f || ''); }),
-    dirty: {}, dataEnd: dataEnd
+    dataEnd: dataEnd
   };
   return ctx.cache[name];
 }
 
-function flushCache_(ctx) {
-  Object.keys(ctx.cache).forEach(function (name) {
-    var t = ctx.cache[name];
-    Object.keys(t.dirty).forEach(function (k) {
-      var i = Number(k);
-      writeRow_(t, i);
-    });
-  });
+/**
+ * Écrit la ligne tout de suite. Si Google la refuse (ex. règle de validation), l'état en mémoire
+ * est restauré et seule cette modification échoue : les autres du lot sont appliquées normalement.
+ */
+function commitRow_(t, i, restore) {
+  try {
+    writeRow_(t, i);
+  } catch (e) {
+    restore();
+    throw err_('WRITE_FAILED', 'Écriture refusée par le classeur : ' + (e && e.message ? e.message : e));
+  }
 }
 
 function writeRow_(t, i) {
@@ -483,10 +487,15 @@ function applyMutation_(ctx, m) {
         ? rec[f] : toCell_(def, f, rec[f]);
     });
     var i = t.dataEnd;
+    var previous = t.values[i];
     t.values[i] = row;
     t.dataEnd = i + 1;
     t.rowById[m.id] = i;
-    t.dirty[i] = true;
+    commitRow_(t, i, function () {
+      if (previous === undefined) t.values.length = i; else t.values[i] = previous;
+      t.dataEnd = i;
+      delete t.rowById[m.id];
+    });
     return { status: 'applied', record: entityAt_(t, i) };
   }
 
@@ -495,6 +504,7 @@ function applyMutation_(ctx, m) {
     if (ri === undefined) throw err_('NOT_FOUND');
     var current = entityAt_(t, ri);
     if (!canSeeAll_(user) && current.commercial !== user.code) throw err_('FORBIDDEN');
+    var before = t.values[ri].slice();
     var base = m.base || {};
     var conflicts = [];
     var changed = false;
@@ -528,7 +538,7 @@ function applyMutation_(ctx, m) {
       t.values[ri][t.idx['VERSION']] = (Number(t.values[ri][t.idx['VERSION']]) || 0) + 1;
       t.values[ri][t.idx['MAJ LE']] = ctx.now;
       if (t.idx['MAJ PAR'] !== undefined) t.values[ri][t.idx['MAJ PAR']] = user.code;
-      t.dirty[ri] = true;
+      commitRow_(t, ri, function () { t.values[ri] = before; });
     }
     if (conflicts.length) logConflicts_(ctx, m, conflicts);
     return { status: conflicts.length ? 'conflict' : 'applied', conflicts: conflicts, record: entityAt_(t, ri) };

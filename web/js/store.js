@@ -216,6 +216,7 @@ async function pushAll() {
       } else {
         o.attempts++;
         o.error = r.error;
+        o.message = r.message || '';
         ops.push({ store: 'outbox', put: o });
       }
     }
@@ -223,7 +224,10 @@ async function pushAll() {
     notify();
     const stillPending = state.outbox.filter(o => o.status === 'pending');
     // Évite une boucle infinie si le serveur renvoie des erreurs temporaires.
-    if (stillPending.length && stillPending.length >= pending.length) throw new ApiError('SERVER_ERROR', 'Certaines modifications n\'ont pas pu être envoyées.');
+    if (stillPending.length && stillPending.length >= pending.length) {
+      const blocked = stillPending.find(o => o.message || o.error);
+      throw new ApiError('SERVER_ERROR', stillPending.length + ' modification(s) refusée(s) par le classeur' + (blocked && blocked.message ? ' : ' + blocked.message : '.'));
+    }
     pending = stillPending;
   }
 }

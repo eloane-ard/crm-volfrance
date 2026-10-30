@@ -2,7 +2,7 @@
 // Elle peut aussi être saisie sur l'écran de connexion ; elle est alors mémorisée sur l'appareil.
 export const CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbw2HXQL1IyXwt8RZg0CBkTD_Jm1S9ROspt0j7ps7EKS0UMg4vx7mHrNngVtY2CR_5q1/exec',
-  APP_VERSION: '1.0.2'
+  APP_VERSION: '1.0.3'
 };
 
 export function apiUrl() {

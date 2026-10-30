@@ -156,3 +156,36 @@ test('plans de prospection : onglet créé automatiquement', () => {
   assert.strictEqual(pull.plans.length, 1);
   assert.strictEqual(pull.plans[0].clientIds, 'CLI-0025,CLI-0026');
 });
+
+test('écriture refusée par le classeur : seule la modification concernée échoue, puis passe au renvoi', () => {
+  const gas = createGas();
+  seed(gas.ss);
+  // Cases à cocher décochées sur des centaines de lignes vides (comme la colonne DESTOCKAGE).
+  const clients = gas.ss.sheets['CLIENTS'];
+  for (let r = clients.data.length; r < 600; r++) { const row = new Array(21).fill(''); row[14] = false; clients.data.push(row); }
+  // Validation stricte : la colonne CLIENTS de VISITES refuse un nom inconnu.
+  gas.ss.sheets['VISITES'].reject = (r, c, v) => c === 0 && v === 'Résidence Nouvelle';
+  const token = login(gas, 'eloane@test.local');
+  const muts = [
+    { mid: 'w1', entity: 'client', op: 'create', id: 'CLI-NEW001', fields: { nom: 'Résidence Nouvelle', ville: 'Bécherel', statut: 'PROSPECT' } },
+    { mid: 'w2', entity: 'visite', op: 'create', id: 'VIS-NEW001', fields: { clientId: 'CLI-NEW001', date: '2026-10-30', type: 'VISITE', sujet: 'Première visite' } },
+    { mid: 'w3', entity: 'visite', op: 'create', id: 'VIS-NEW002', fields: { clientId: 'CLI-0002', date: '2026-10-30', type: 'VISITE', sujet: 'Autre visite' } }
+  ];
+  const r1 = gas.post({ action: 'push', token, mutations: muts });
+  assert.ok(r1.ok);
+  assert.deepStrictEqual(r1.results.map(r => r.status), ['applied', 'error', 'applied']);
+  assert.strictEqual(r1.results[1].error, 'WRITE_FAILED');
+  assert.match(r1.results[1].message, /validation/);
+  const rowIdx = clients.data.findIndex(r => r[16] === 'CLI-NEW001');
+  assert.strictEqual(rowIdx, 41, 'nouveau client juste après les données, pas après les cases vides');
+  const visits = gas.ss.sheets['VISITES'].data;
+  assert.ok(!visits.some(r => r[8] === 'VIS-NEW001'), 'aucune ligne partielle');
+  assert.ok(visits.some(r => r[8] === 'VIS-NEW002'));
+
+  // La règle est assouplie : le renvoi de la même modification passe, sans doublon.
+  gas.ss.sheets['VISITES'].reject = null;
+  const r2 = gas.post({ action: 'push', token, mutations: muts });
+  assert.deepStrictEqual(r2.results.map(r => r.status), ['applied', 'applied', 'applied']);
+  assert.strictEqual(visits.filter(r => r[8] === 'VIS-NEW001').length, 1);
+  assert.strictEqual(visits.filter(r => r[8] === 'VIS-NEW002').length, 1);
+});
